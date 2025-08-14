@@ -70,8 +70,8 @@ Terraform (EC2, RDS, S3, IAM, SG)
 
 ### 1) Repo klonen
 ```bash
-git clone https://github.com/<DEIN_USER>/<DEIN_REPO>.git
-cd <DEIN_REPO>
+git clone https://github.com/jesaja44/AWS_Fullstack_App-Infrastructure-Deployment.git
+cd AWS_Fullstack_App-Infrastructure-Deployment
 ```
 
 ### 2) Terraform vorbereiten
@@ -107,7 +107,7 @@ docker --version
 ### 5) Backend deployen
 ```bash
 # Code holen (wenn Repo privat: SSH-Deploy-Key nutzen oder per scp hochladen)
-git clone https://github.com/<DEIN_USER>/<DEIN_REPO>.git app
+git clone https://github.com/jesaja44/AWS_Fullstack_App-Infrastructure-Deployment.git app
 cd app/backend
 
 # .env anlegen (siehe nächster Abschnitt)
