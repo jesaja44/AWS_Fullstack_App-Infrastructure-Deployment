@@ -29,3 +29,7 @@ backend/app/local.db
 infrastructure/terraform.tfvars
 backend/.env
 terraform.tfstate*
+infrastructure/*.bak.*
+*.bak.*
+infrastructure/tfplan
+*.tfplan
