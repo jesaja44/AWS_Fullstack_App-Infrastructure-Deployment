@@ -1,0 +1,15 @@
+# ===== Example values (commit this file) =====
+
+# AWS Region
+region      = "eu-central-1"
+
+# EC2
+key_name    = "aws_grocery_key"
+
+# RDS
+db_username = "postgres"
+db_password = "REPLACE_ME"
+db_name     = "aws_grocery_db"
+
+# S3
+bucket_name = "your-unique-bucket-name-12345"

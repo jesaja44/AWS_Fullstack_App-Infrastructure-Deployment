@@ -26,3 +26,6 @@ backend/logs/
 # Databases
 *.db
 backend/app/local.db
+infrastructure/terraform.tfvars
+backend/.env
+terraform.tfstate*

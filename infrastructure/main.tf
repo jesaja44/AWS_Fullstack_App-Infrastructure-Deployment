@@ -7,7 +7,7 @@ resource "random_id" "suffix" {
 }
 
 data "aws_vpc" "selected" {
-  id = "vpc-09d707260f1cee0ed"
+  id = var.vpc_id
 }
 
 data "aws_subnets" "selected" {
@@ -78,7 +78,7 @@ resource "aws_instance" "web" {
   subnet_id              = data.aws_subnets.selected.ids[0]
 
   # IAM Role anhängen (hier ggf. anpassen)
-  # iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
   tags = {
     Name = "grocery-ec2"
@@ -98,7 +98,7 @@ resource "aws_db_instance" "postgres" {
   identifier             = "mario-rose-db"
   allocated_storage      = 20
   engine                 = "postgres"
-  engine_version         = "15"
+  engine_version         = "15.12"
   instance_class         = "db.t3.micro"
   username               = var.db_username
   password               = var.db_password
