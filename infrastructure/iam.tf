@@ -13,19 +13,31 @@ resource "aws_iam_role" "ec2_ssm_role" {
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
 }
 
-# SSM (Session Manager), praktisch für Zugriff ohne SSH-Keys
+# SSM (für Session Manager)
 resource "aws_iam_role_policy_attachment" "ssm_core" {
   role       = aws_iam_role.ec2_ssm_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# Minimaler S3-Zugriff NUR auf deinen Bucket aus Terraform
+# S3: Bucket-Config READ + Objekt RW (nur dein Bucket)
 data "aws_iam_policy_document" "s3_limited" {
+  # Bucket-scope (nur lesen)
   statement {
-    actions   = ["s3:ListBucket"]
+    sid = "BucketReadChecks"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:GetBucketVersioning",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketPolicyStatus"
+    ]
     resources = [aws_s3_bucket.avatars.arn]
   }
+
+  # Objekt-scope (lesen/schreiben/löschen)
   statement {
+    sid       = "ObjectRW"
     actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
     resources = ["${aws_s3_bucket.avatars.arn}/*"]
   }
