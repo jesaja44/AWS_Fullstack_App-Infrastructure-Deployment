@@ -33,3 +33,7 @@ infrastructure/*.bak.*
 *.bak.*
 infrastructure/tfplan
 *.tfplan
+infrastructure/*.bak.*
+*.bak.*
+infrastructure/tfplan
+*.tfplan
