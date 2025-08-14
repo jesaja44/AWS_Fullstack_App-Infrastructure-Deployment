@@ -1,5 +1,28 @@
-.idea/aws.xml
-frontend/frontend-build.zip
-frontend/temp_extract/
-frontend/src/config.js~
-venv/
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Node
+node_modules/
+
+# Logs & Sonstiges
+*.log
+backend/logs/
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+
+# Databases
+*.db
+backend/app/local.db
