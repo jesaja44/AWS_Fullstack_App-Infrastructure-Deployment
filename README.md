@@ -1,175 +1,208 @@
-# GroceryMate
+# AWS Fullstack App – Infrastructure & Deployment
 
-## 🏆 GroceryMate E-Commerce Platform
+Moderne Fullstack-App (React + Flask) mit Docker auf EC2, PostgreSQL in RDS und S3 für Datei-Uploads – vollständig mit Terraform bereitgestellt.
 
-[![Python](https://img.shields.io/badge/Language-Python%2C%20JavaScript-blue)](https://www.python.org/)
-[![OS](https://img.shields.io/badge/OS-Linux%2C%20Windows%2C%20macOS-green)](https://www.kernel.org/)
-[![Database](https://img.shields.io/badge/Database-PostgreSQL-336791)](https://www.postgresql.org/)
-[![GitHub Release](https://img.shields.io/github/v/release/AlejandroRomanIbanez/AWS_grocery)](https://github.com/AlejandroRomanIbanez/AWS_grocery/releases/tag/v2.0.0)
-[![Free](https://img.shields.io/badge/Free_for_Non_Commercial_Use-brightgreen)](#-license)
+## Inhaltsverzeichnis
+- [Überblick](#überblick)
+- [Features](#features)
+- [Architektur](#architektur)
+- [Projektstruktur](#projektstruktur)
+- [Voraussetzungen](#voraussetzungen)
+- [Schnellstart](#schnellstart)
+- [Konfiguration (.env)](#konfiguration-env)
+- [Terraform-Variablen](#terraform-variablen)
+- [S3-Hardening (aktiv)](#s3-hardening-aktiv)
+- [IAM-Rolle für EC2 (aktiv)](#iam-rolle-für-ec2-aktiv)
+- [Port 80 / Produktion (optional)](#port-80--produktion-optional)
+- [Kosten: AWS Free Tier Tipps](#kosten-aws-free-tier-tipps)
+- [Aufräumen](#aufräumen)
+- [Mitwirken & Lizenz](#mitwirken--lizenz)
 
-⭐ **Star us on GitHub** — it motivates us a lot!
+## Überblick
+Die App trennt Frontend und Backend, läuft in Docker-Containern auf einer EC2-Instanz, nutzt Amazon RDS (PostgreSQL) als Datenbank und Amazon S3 für Datei-Uploads. Die komplette Infrastruktur wird per Terraform provisioniert und ist über Variablen portabel (VPC, KeyPair, Bucket-Name etc.).
 
----
+## Features
+- **Infrastructure as Code (Terraform)**: EC2, RDS, S3, IAM, Security Groups
+- **Dockerized Deployment**: Container für das Backend (liefert auch das Frontend-Build aus)
+- **RDS PostgreSQL**: persistente DB
+- **S3 Storage**: Uploads/Assets
+- **.env-Konfiguration**: saubere Trennung von Secrets (nicht versioniert)
 
-## 📌 Table of Contents
+## Architektur
+```
+User
+  │
+  ▼
+[Frontend (React)]
+  │
+  ▼
+[Backend (Flask)]
+  │         │
+  ▼         ▼
+ RDS     ─  S3
+(Postgres) (Storage)
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Screenshots & Demo](#-screenshots--demo)
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-  - [Clone Repository](#-clone-repository)
-  - [Configure PostgreSQL](#-configure-postgresql)
-  - [Populate Database](#-populate-database)
-  - [Set Up Python Environment](#-set-up-python-environment)
-  - [Set Environment Variables](#-set-environment-variables)
-  - [Start the Application](#-start-the-application)
-- [Usage](#-usage)
-- [Contributing](#-contributing)
-- [License](#-license)
-
-## 🚀 Overview
-
-GroceryMate is an application developed as part of the Masterschools program by **Alejandro Roman Ibanez**. It is a modern, full-featured e-commerce platform designed for seamless online grocery shopping. It provides an intuitive user interface and a secure backend, allowing users to browse products, manage their shopping basket, and complete purchases efficiently.
-
-GroceryMate is a modern, full-featured e-commerce platform designed for seamless online grocery shopping. It provides an intuitive user interface and a secure backend, allowing users to browse products, manage their shopping basket, and complete purchases efficiently.
-
-## 🛒 Features
-
-- **🛡️ User Authentication**: Secure registration, login, and session management.
-- **🔒 Protected Routes**: Access control for authenticated users.
-- **🔎 Product Search & Filtering**: Browse products, apply filters, and sort by category or price.
-- **⭐ Favorites Management**: Save preferred products.
-- **🛍️ Shopping Basket**: Add, view, modify, and remove items.
-- **💳 Checkout Process**:
-  - Secure billing and shipping information handling.
-  - Multiple payment options.
-  - Automatic total price calculation.
-
-## 📸 Screenshots & Demo
-
-![imagen](https://github.com/user-attachments/assets/ea039195-67a2-4bf2-9613-2ee1e666231a)
-![imagen](https://github.com/user-attachments/assets/a87e5c50-5a9e-45b8-ad16-2dbff41acd00)
-![imagen](https://github.com/user-attachments/assets/589aae62-67ef-4496-bd3b-772cd32ca386)
-![imagen](https://github.com/user-attachments/assets/2772b85e-81f7-446a-9296-4fdc2b652cb7)
-
-https://github.com/user-attachments/assets/d1c5c8e4-5b16-486a-b709-4cf6e6cce6bc
-
-## 📋 Prerequisites
-
-Ensure the following dependencies are installed before running the application:
-
-- **🐍 Python (>=3.11)**
-- **🐘 PostgreSQL** – Database for storing product and user information.
-- **🛠️ Git** – Version control system.
-
-## ⚙️ Installation
-
-### 🔹 Clone Repository
-
-```sh
-git clone --branch version2 https://github.com/AlejandroRomanIbanez/AWS_grocery.git && cd AWS_grocery
+ ↑
+ │
+Terraform (EC2, RDS, S3, IAM, SG)
 ```
 
-### 🔹 Configure PostgreSQL
-
-Before creating the database user, you can choose a custom username and password to enhance security. Replace `<your_secure_password>` with a strong password of your choice in the following commands.
-
-Create database and user:
-
-```sh
-psql -U postgres -c "CREATE DATABASE grocerymate_db;"
-psql -U postgres -c "CREATE USER grocery_user WITH ENCRYPTED PASSWORD '<your_secure_password>';"  # Replace <your_secure_password> with a strong password of your choice
-psql -U postgres -c "ALTER USER grocery_user WITH SUPERUSER;"
+## Projektstruktur
+```
+.
+├── backend/                      # Flask-App (liefert auch Frontend-Build aus)
+├── frontend/                     # (optional) Frontend-Quellcode
+└── infrastructure/               # Terraform
+    ├── main.tf                   # EC2, SGs, RDS, S3
+    ├── variables.tf              # Variablen (inkl. vpc_id, key_name, ...)
+    ├── iam.tf                    # EC2-Instance-Profile + S3-Policy + SSM
+    ├── s3_hardening.tf           # Verschlüsselung, Versioning, PAB, TLS-only, Lifecycle
+    └── terraform.tfvars.example  # Vorlage zum Ausfüllen (lokal eigene terraform.tfvars)
 ```
 
-### 🔹 Populate Database
+## Voraussetzungen
+- **AWS CLI** mit gültigen Credentials/SSO
+- **Terraform**
+- **Docker**
+- **SSH KeyPair** in deiner Region (Name später als `key_name` verwenden)
 
-```sh
-psql -U grocery_user -d grocerymate_db -f backend/app/sqlite_dump_clean.sql
+## Schnellstart
+
+### 1) Repo klonen
+```bash
+git clone https://github.com/<DEIN_USER>/<DEIN_REPO>.git
+cd <DEIN_REPO>
 ```
 
-Verify insertion:
-
-```sh
-psql -U grocery_user -d grocerymate_db -c "SELECT * FROM users;"
-psql -U grocery_user -d grocerymate_db -c "SELECT * FROM products;"
+### 2) Terraform vorbereiten
+```bash
+cd infrastructure
+cp terraform.tfvars.example terraform.tfvars
+# terraform.tfvars mit DEINEN Werten füllen (siehe unten)
+terraform init
+terraform fmt -recursive
+terraform validate
+terraform plan -var-file=terraform.tfvars -out=tfplan
+terraform apply "tfplan"
 ```
 
-### 🔹 Set Up Python Environment
+**Outputs**: `ec2_public_ip`/DNS, `rds_endpoint`, `s3_bucket`.
 
-
-Install dependencies in an activated virtual Enviroment:
-
-```sh
-cd backend
-pip install -r requirements.txt
-```
-OR (if pip doesn't exist)
-```sh
-pip3 install -r requirements.txt
+### 3) Auf EC2 einloggen
+```bash
+ssh -i ~/.ssh/<dein-key>.pem ec2-user@<ec2_public_ip>
 ```
 
-### 🔹 Set Environment Variables
-
-Create a `.env` file:
-
-```sh
-touch .env  # macOS/Linux
-ni .env -Force  # Windows
+### 4) Docker installieren (falls AMI frisch)
+```bash
+sudo yum update -y
+sudo amazon-linux-extras enable docker || true
+sudo yum install -y docker git
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user
+newgrp docker || true
+docker --version
 ```
 
-Generate a secure JWT key:
+### 5) Backend deployen
+```bash
+# Code holen (wenn Repo privat: SSH-Deploy-Key nutzen oder per scp hochladen)
+git clone https://github.com/<DEIN_USER>/<DEIN_REPO>.git app
+cd app/backend
 
-```sh
-python3 -c "import secrets; print(secrets.token_hex(32))"
-```
-
-Update `.env`:
-
-```sh
+# .env anlegen (siehe nächster Abschnitt)
 nano .env
+
+# Container bauen & starten
+docker build -t grocery-backend:latest .
+docker run -d --name grocery-backend --env-file .env -p 5000:5000 --restart unless-stopped grocery-backend:latest
+
+# Test
+curl -I http://localhost:5000/
 ```
 
-Fill in the following information (make sure to replace the placeholders):
+## Konfiguration (.env)
+Diese Variablen werden vom Backend gelesen (RDS mit SSL, S3 via Instance-Rolle – keine Access Keys nötig):
 
-```ini
-JWT_SECRET_KEY=<your_generated_key>
-POSTGRES_USER=grocery_user
-POSTGRES_PASSWORD=<your_password>
-POSTGRES_DB=grocerymate_db
-POSTGRES_HOST=localhost
-POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+```dotenv
+FLASK_ENV=production
+
+# Datenbank (RDS)
+POSTGRES_URI=postgresql://<db_user>:<db_password>@<rds_endpoint>:5432/<db_name>?sslmode=require
+SQLALCHEMY_DATABASE_URI=${POSTGRES_URI}
+DATABASE_URL=${POSTGRES_URI}
+
+# AWS
+AWS_REGION=<deine-region>          # z. B. eu-central-1
+AWS_S3_BUCKET=<dein-s3-bucket>     # aus Terraform-Output
 ```
 
-### 🔹 Start the Application
+> **Wichtig:** `backend/.env` niemals committen. `.gitignore` enthält einen Eintrag dafür.
 
-```sh
-python3 run.py
+## Terraform-Variablen
+In `infrastructure/terraform.tfvars` z. B.:
+```hcl
+region      = "eu-central-1"
+vpc_id      = "vpc-xxxxxxxx"         # deine (Default-)VPC
+key_name    = "mein-keypair-name"    # vorhandenes KeyPair in der Region
+
+db_username = "grocerymate"
+db_password = "STRONG_PASSWORD"
+db_name     = "grocery"
+
+bucket_name = "global-eindeutiger-bucket-name-12345"
 ```
 
-## 📖 Usage
+**Portabilität:** In `main.tf` ist die VPC nicht hart codiert; `vpc_id` und `key_name` kommen aus Variablen. Damit kann jeder das Projekt in der eigenen AWS-Umgebung ausrollen.
 
-- Access the application at [http://localhost:5000](http://localhost:5000)
-- Register/Login to your account
-- Browse and search for products
-- Manage favorites and shopping basket
-- Proceed through the checkout process
+## S3-Hardening (aktiv)
+Der Bucket wird bei `terraform apply` automatisch gehärtet:
+- **Public Access Block** (blockt öffentliche ACLs/Policies)
+- **Default-Encryption (SSE-S3/AES256)**
+- **Versioning** + **Lifecycle** (abgebrochene Multipart-Uploads, Aufräumen alter Versionen)
+- **TLS-only Bucket Policy** (HTTP wird abgewiesen)
+- **Ownership Controls**: `BucketOwnerEnforced` (keine ACLs nötig/erlaubt)
 
-## 🤝 Contributing
+> Falls dein Code ACLs wie `public-read` setzt, führt das zu Fehlern („ACLs are not supported“). Entferne solche ACLs – dank Public-Access-Block nicht mehr nötig.
 
-We welcome contributions! Please follow these steps:
+## IAM-Rolle für EC2 (aktiv)
+Die EC2-Instanz erhält per **Instance Profile** eine minimal gehaltene S3-Policy:
+- **Objekt-Zugriff**: `GetObject`, `PutObject`, `DeleteObject` auf deinem Bucket
+- **Bucket-Read-Checks** (optional): `GetBucketVersioning`, `GetEncryptionConfiguration`, `GetBucketPublicAccessBlock`, `GetBucketPolicyStatus`, `ListBucket`, `GetBucketLocation`
+- **SSM-Core**: bequemer Zugriff via AWS Systems Manager möglich
 
-1. Fork the repository.
-2. Create a new feature branch (`feature/your-feature`).
-3. Implement your changes and commit them.
-4. Push your branch and create a pull request.
+**boto3** zieht die temporären Credentials automatisch aus der Instance-Rolle – keine `AWS_ACCESS_KEY_ID/SECRET` in `.env` nötig.
 
-## 📜 License
+## Port 80 / Produktion (optional)
+Schöner ohne `:5000`:
+1. Security Group in Terraform um Port 80 ergänzen.
+2. Container auf 80 mappen:
+   ```bash
+   docker rm -f grocery-backend
+   docker run -d --name grocery-backend --env-file .env -p 80:5000 --restart unless-stopped grocery-backend:latest
+   ```
+**Empfehlung Produktion:** **Gunicorn** statt Flask-Dev-Server benutzen:
+```dockerfile
+# im Dockerfile:
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5000", "app:app"]
+```
 
-This project is licensed under the MIT License.
+## Kosten: AWS Free Tier Tipps
+- **Kleine Instanzen** wählen (Micro), regionale Verfügbarkeit beachten.
+- **RDS klein halten** und nur bei Bedarf laufen lassen; nach Tests Ressourcen **zerstören**.
+- **S3 Versioning** erzeugt mehr Objekte – Lifecycle hilft beim Aufräumen.
+- **Budgets/Alarme** im Billing aktivieren (z. B. E-Mail ab €-Schwelle).
 
+> Free-Tier-Konditionen ändern sich. Prüfe vor Nutzung die aktuelle AWS Free Tier Seite.
 
+## Aufräumen
+Alles wieder entfernen (vermeidet Kosten):
+```bash
+cd infrastructure
+terraform destroy
+```
 
+## Mitwirken & Lizenz
+PRs willkommen!  
+Lizenz: MIT (siehe `LICENSE`).
 
