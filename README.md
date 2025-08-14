@@ -202,3 +202,6 @@ terraform destroy
 PRs welcome!  
 License: MIT (see `LICENSE`).
 
+
+---
+> **Note:** Suggestions welcome via Issues/PRs. Only maintainers can merge changes.
