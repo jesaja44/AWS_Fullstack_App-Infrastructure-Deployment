@@ -1,3 +1,5 @@
+[![Terraform CI](https://github.com/jesaja44/AWS_Fullstack_App-Infrastructure-Deployment/actions/workflows/terraform.yml/badge.svg)](https://github.com/jesaja44/AWS_Fullstack_App-Infrastructure-Deployment/actions/workflows/terraform.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 # AWS Fullstack App – Infrastructure & Deployment
 
 Modern full‑stack app (React + Flask) running in Docker on EC2, PostgreSQL on Amazon RDS, and Amazon S3 for file uploads — fully provisioned with Terraform.
