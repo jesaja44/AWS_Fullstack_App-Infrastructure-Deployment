@@ -34,3 +34,8 @@ variable "vpc_id" {
   type        = string
   description = "VPC ID to deploy into (e.g., vpc-abc123)"
 }
+
+variable "allowed_ssh_cidr" {
+  type        = string
+  description = "CIDR permitted to SSH into EC2 on port 22 (e.g. 1.2.3.4/32)"
+}
