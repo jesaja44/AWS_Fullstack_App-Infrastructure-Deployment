@@ -2,9 +2,10 @@
 # EC2 (virtueller Server), SSM (AWS Systems Manager), TF (Terraform)
 AWS_PROFILE ?= default
 AWS_REGION  ?= eu-central-1
+AWS_PAGER   := ""         # Pager aus
 INFRA_DIR   ?= infrastructure
 
-export AWS_PROFILE AWS_REGION
+export AWS_PROFILE AWS_REGION AWS_PAGER
 
 .PHONY: infra-apply outputs health restart-backend aws-login
 
