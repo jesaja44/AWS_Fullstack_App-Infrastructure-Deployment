@@ -17,3 +17,5 @@ output "s3_bucket" {
   description = "Name of the S3 bucket for avatars"
   value       = aws_s3_bucket.avatars.bucket
 }
+output "alb_dns" { value = aws_lb.app.dns_name }
+output "alb_tg_arn" { value = aws_lb_target_group.app_tg.arn }
